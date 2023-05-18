@@ -1,4 +1,4 @@
-# Bioinformatics analytics
+# Data science project 1
 
 # Description:
 This is a miniature dataset that was simulated based on individual research and doesnt relate or correspond to any organization. This dataset would be fun play around with especially for folks from a Biotechology or Bioinformatics background. 
