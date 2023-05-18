@@ -1,7 +1,7 @@
 # Bioinformatics analytics
 
 # Description:
-This is a miniature dataset that was simulated based on individual research and doesnt relate or correspond any organization. This dataset would be fun play around with especially for folks from a Biotechology or Bioinformatics background. 
+This is a miniature dataset that was simulated based on individual research and doesnt relate or correspond to any organization. This dataset would be fun play around with especially for folks from a Biotechology or Bioinformatics background. 
 
 
 # Information about the features of this dataset :
@@ -39,7 +39,7 @@ Position: Genomic position of the QTL on the chromosome.
 Trait: Phenotypic trait associated with the QTL (e.g., yield, height).
 LOD Score: Logarithm of the odds (LOD) score, indicating the strength of the association between the QTL and the trait.
 
-I would advice anyone who tries to look at this dataset to do more of their research on each of the above attributes so that the final interpretations would be relevant and understandable.
+ I would advice anyone who tries to look at this dataset to do more of their research on each of the above attributes so that the final interpretations would be relevant and understandable.
 
 But otherwise, Have fun!!
 
