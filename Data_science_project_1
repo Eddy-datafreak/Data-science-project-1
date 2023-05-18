@@ -1,0 +1,224 @@
+
+#Import the necessary packages
+
+import random
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import ttest_ind
+
+#Check the working directory
+os.getcwd()
+
+#Set the working directory
+os.chdir('Your directory here')
+
+#Now we generate the data
+
+# Gene Sequence Data
+gene_ids = [f'Gene{str(i).zfill(4)}' for i in range(1, 10001)]
+gene_sequences = [''.join(random.choices('ATCG', k=50)) for _ in range(10000)]
+gene_descriptions = ['Gene description ' + str(i) for i in range(1, 10001)]
+
+# Expression Data
+tissue_types = random.choices(['leaf', 'root', 'stem'], k=10000)
+experimental_conditions = random.choices(['drought stress', 'high light intensity'], k=10000)
+expression_levels = [random.uniform(0, 100) for _ in range(10000)]
+
+# Protein Data
+protein_ids = [f'Protein{str(i).zfill(4)}' for i in range(1, 10001)]
+protein_sequences = [''.join(random.choices(string.ascii_uppercase, k=50)) for _ in range(10000)]
+protein_functions = ['Protein function ' + str(i) for i in range(1, 10001)]
+
+# Genetic Mapping Data
+qtl_ids = [f'QTL{str(i).zfill(4)}' for i in range(1, 10001)]
+chromosomes = random.choices(range(1, 11), k=10000)
+positions = [random.randint(1, 1000000) for _ in range(10000)]
+traits = random.choices(['yield', 'height'], k=10000)
+lod_scores = [random.uniform(0, 10) for _ in range(10000)]
+
+# Create the dataframe
+data = {
+    'Gene ID': gene_ids,
+    'Gene Sequence': gene_sequences,
+    'Gene Description': gene_descriptions,
+    'Tissue Type': tissue_types,
+    'Experimental Condition': experimental_conditions,
+    'Expression Level': expression_levels,
+    'Protein ID': protein_ids,
+    'Protein Sequence': protein_sequences,
+    'Protein Function': protein_functions,
+    'QTL ID': qtl_ids,
+    'Chromosome': chromosomes,
+    'Position': positions,
+    'Trait': traits,
+    'LOD Score': lod_scores
+}
+
+#Converting to dataframe
+df = pd.DataFrame(data)
+
+################################################### EDA ###################################################
+
+#Check the structure of the data and its types
+print("Dataset Structure:")
+print(df.info())
+
+#Exploring the measures of central tendency and dispersion
+print("\nDescriptive Statistics:")
+print(df.describe())
+
+
+# Count of unique values in categorical variables
+print("\nCount of unique values in categorical variables:")
+print(df['Tissue Type'].value_counts())
+print(df['Experimental Condition'].value_counts())
+print(df['Trait'].value_counts())
+
+#Lets count the null values for each column in the dataframe.
+# Checking null values
+print("\nNull Values:")
+print(df.isna().sum())
+
+#Now lets count the number of missing values for each column in the dataframe.
+print("Missing Values:")
+print(df.isnull().sum())
+
+#Let us also aggregate certain variables and check their distribution
+#Seems like the expression level are higher among Leaf and Stem as compared to the root
+df.groupby(df['Tissue Type'])['Expression Level'].mean()
+#An extra step
+# 
+agg_df = df.groupby('Tissue Type').agg({
+    'Expression Level': ['median', 'min', 'max'],
+    'Position': 'mean',
+    'LOD Score': 'mean'
+})
+
+print(agg_df)
+
+#One apparent difference is that the mean of the expression level for the leaf and stem are almost similar and the position and the LOD score show similar values for leaf 
+#and root. Since we have not mentioned as specific to a species of plant, the results would vary.
+
+#We can alos check for missing values using a plot using a barplot from seaborn library and here the variables with missing values will be sorted in descending order.
+
+#
+missing_values = df.isnull().sum()
+missing_values = missing_values[missing_values > 0]
+missing_values.sort_values(ascending=False, inplace=True)
+
+plt.figure(figsize=(8, 6))
+sns.barplot(x=missing_values.index, y=missing_values.values, palette='viridis')
+plt.xticks(rotation=90)
+plt.xlabel('Variables')
+plt.ylabel('Missing Values')
+plt.title('Missing Values in the Dataset')
+plt.show()
+
+#Since there are no missing values you might get a value error(ValueError: min() arg is an empty sequence) but it might no be the case in reality. If there are missing values 
+#we can identify that for each column using this plot.
+
+#We could just inspect the distribution of variables. Example here we inspect the distribution of the "Expression Levels" variable.
+plt.hist(df['Expression Level'], bins=20, color='skyblue')
+plt.xlabel('Expression Level')
+plt.ylabel('Frequency')
+plt.title('Histogram of Expression Levels')
+plt.show()
+
+#Relationship between continuous variables can be assessed using .corr() function. This would give us the variables that are correlated to each other. This could also
+#provide a pretext of what to expect while performing a regression analysis.
+
+#So lets create correlation matrix
+correlation_matrix = df[['Expression Level', 'Position', 'LOD Score','Chromosome']].corr()
+print("\nCorrelation Matrix:")
+print(correlation_matrix)
+
+The output gives us a pattern of numbers between -1 to +1, which shows how string the correlation is and what kind of a relationship that is between each variable.
+
+#We can also visually inspect this correlation between variables. Here lets see the correlation betwee expression level and LOD scores.
+#Scatter plot
+plt.scatter(df['Expression Level'],df['LOD Score'],c='blue')
+plt.xlabel('Expression Level')
+plt.ylabel('LOD Score')
+
+#The output should tell us whether the correlation is what the nummbers tells us and whether its a positive or a negative correlation.
+
+################################################### Hypothesis testing ###################################################
+
+
+#Now Lets do a Hypothesis testing between the same variables that were correlated by performing a T-test 
+
+#Here test the hypothesis whether the means of the "Expression Level" variable band LOD score
+#
+t_statistic, p_value = ttest_ind(df['Expression Level'], df['LOD Score'])
+
+#
+print("T-Test Results:")
+print("T-Statistic:", t_statistic)
+print("P-Value:", p_value)
+
+#We can obbserve that the variables are significantly correlated and this is not just by the chance.
+
+#But just of curiosity, Lets just test the hypothesis whether the expression level changes based on drought stress and high light intensity categories from
+#the "Experimental Condition" variable
+drought_stress = df[df['Experimental Condition'] == 'drought stress']
+high_light_intensity = df[df['Experimental Condition'] == 'high light intensity']
+
+#
+t_statistic, p_value = ttest_ind(drought_stress['Expression Level'], high_light_intensity['Expression Level'])
+
+#
+print("T-Test Results:")
+print("T-Statistic:", t_statistic)
+print("P-Value:", p_value)
+
+#We would observe that there is no significant change in the cateegories based on the expression level.
+
+#As last hypothesis testing, Lets compare the means between 2 independent groups i.e "Position" and "LOD Score" 
+
+#So the assumptions as a refresher is that the two groups are independent and are normally distributed
+
+# Subset the data for the two groups
+group1 = df['Position']
+group2 = df['LOD Score']
+
+#t-test
+t_statistic, p_value = ttest_ind(group1, group2)
+
+# Print the results
+print("Independent T-Test Results:")
+print("T-Statistic:", t_statistic)
+print("P-Value:", p_value)
+
+#We would observe that they are significant differences between the groups.
+#Lets reconfirm with the above variables the the assumption on Homogeniety of variances is fulfilled
+
+#For this we perform the levenes test for homogeneity of variance i.e equal variance
+t_statistic, p_value = levene(group1, group2)
+# Print the results
+print("Independent T-Test Results:")
+print("T-Statistic:", t_statistic)
+print("P-Value:", p_value)
+
+#If the p value shows significance of variance then this indicates that the groups have unequal variance and the ttest may not be the best statistical method to use here,
+#but its adviced to explore the data likewise by tests and visualization before moving to inferential and predictive modellin so that the results are not misinterpreted.
+
+##ML to be updated.###
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
