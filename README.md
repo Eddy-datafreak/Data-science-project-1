@@ -1,7 +1,7 @@
 
 
 # Description:
-This is a miniature dataset that was simulated based on individual research and doesnt relate or correspond to any organization. This dataset would be fun play around with especially for folks from a Biotechology or Bioinformatics background. The project was done in python, and will be updated further.
+This is a miniature dataset that was simulated based on individual research and doesnt relate or correspond to any organization. This dataset would be fun play around with especially for folks from a Biotechology or Bioinformatics background. The project was done in python, and will be updated further. Any other improvements with the current codes are welcome.
 
 
 # Information about the features of this dataset :
